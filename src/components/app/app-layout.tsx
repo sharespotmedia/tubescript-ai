@@ -194,8 +194,8 @@ export function AppLayout() {
             </SidebarFooter>
           </Sidebar>
 
-          <main className="flex-1 flex flex-col bg-background">
-            <div className="flex-1 flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
+          <main className="flex-1 flex flex-col bg-background h-full overflow-y-auto">
+            <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
               <header>
                 <h1 className="text-4xl font-headline font-bold">
                   Create Your Script
@@ -269,37 +269,37 @@ export function AppLayout() {
                   </>
                 )}
               </Button>
+            </div>
 
-              <div className="flex-1 flex flex-col mt-4">
-                {isLoading && !generatedScript ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="space-y-4 text-center">
-                      <p className="text-muted-foreground">
-                        Generating your script...
-                      </p>
-                      <Skeleton className="h-24 w-full" />
-                      <Skeleton className="h-12 w-full" />
-                    </div>
+            <div className="flex-1 flex flex-col p-8 md:p-12 pt-0">
+              {isLoading && !generatedScript ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="space-y-4 text-center">
+                    <p className="text-muted-foreground">
+                      Generating your script...
+                    </p>
+                    <Skeleton className="h-24 w-full" />
+                    <Skeleton className="h-12 w-full" />
                   </div>
-                ) : generatedScript ? (
-                  <Card className="flex-1 bg-secondary border-border">
-                    <CardContent className="p-4 h-full">
-                      <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto">
-                        {generatedScript}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-background">
-                    <div className="text-center text-muted-foreground">
-                      <FileText className="mx-auto h-12 w-12" />
-                      <p className="mt-4">
-                        Your generated script will appear here
-                      </p>
-                    </div>
+                </div>
+              ) : generatedScript ? (
+                <Card className="flex-1 bg-secondary border-border">
+                  <CardContent className="p-4 h-full">
+                    <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto">
+                      {generatedScript}
+                    </pre>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-background min-h-[200px]">
+                  <div className="text-center text-muted-foreground">
+                    <FileText className="mx-auto h-12 w-12" />
+                    <p className="mt-4">
+                      Your generated script will appear here
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </main>
         </form>
