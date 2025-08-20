@@ -4,10 +4,14 @@ import { generateVideoScript, type GenerateVideoScriptInput } from '@/ai/flows/g
 
 export async function handleGenerateScript(input: GenerateVideoScriptInput) {
   try {
-    const payload = {
-      ...input,
-      referenceUrl: input.referenceUrl || undefined,
+    const payload: GenerateVideoScriptInput = {
+      topic: input.topic,
+      contentType: input.contentType,
     };
+
+    if (input.referenceUrl) {
+      payload.referenceUrl = input.referenceUrl;
+    }
     
     const result = await generateVideoScript(payload);
     return { success: true, data: result };
