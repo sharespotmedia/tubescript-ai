@@ -12,7 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { geminiPro } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 const AnalyzeContentCreatorStyleInputSchema = z.object({
   referenceUrl: z
@@ -49,7 +49,7 @@ URL: {{{referenceUrl}}}
 
 Style Guide:`,
   config: {
-    model: geminiPro,
+    model: gemini15Pro,
   },
 });
 

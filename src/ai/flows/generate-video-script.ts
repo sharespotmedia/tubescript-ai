@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { geminiPro } from '@genkit-ai/googleai';
+import { gemini15Pro } from '@genkit-ai/googleai';
 
 const GenerateVideoScriptInputSchema = z.object({
   topic: z.string().describe('The topic of the video script.'),
@@ -43,7 +43,7 @@ Reference URL: {{{referenceUrl}}}
 {{/if}}
 `,
   config: {
-    model: geminiPro,
+    model: gemini15Pro,
   },
 });
 
