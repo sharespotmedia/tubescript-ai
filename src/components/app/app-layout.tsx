@@ -231,10 +231,13 @@ export function AppLayout() {
                 name="topic"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-headline">Video Topic</FormLabel>
+                    <FormLabel className="font-headline">Video Idea</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., 'Unboxing the new AI-powered gadget'" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Explain not only the main topic but also key ideas to be included within the script.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
