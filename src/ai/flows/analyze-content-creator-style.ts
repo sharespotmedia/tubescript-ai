@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { geminiPro } from '@genkit-ai/googleai';
 
 const AnalyzeContentCreatorStyleInputSchema = z.object({
   referenceUrl: z
@@ -47,6 +48,9 @@ const prompt = ai.definePrompt({
 URL: {{{referenceUrl}}}
 
 Style Guide:`,
+  config: {
+    model: geminiPro,
+  },
 });
 
 const analyzeContentCreatorStyleFlow = ai.defineFlow(

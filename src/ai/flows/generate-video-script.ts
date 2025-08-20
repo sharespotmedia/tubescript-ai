@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { geminiPro } from '@genkit-ai/googleai';
 
 const GenerateVideoScriptInputSchema = z.object({
   topic: z.string().describe('The topic of the video script.'),
@@ -41,6 +42,9 @@ Analyze the style of the following reference URL and apply it to the generated s
 Reference URL: {{{referenceUrl}}}
 {{/if}}
 `,
+  config: {
+    model: geminiPro,
+  },
 });
 
 const generateVideoScriptFlow = ai.defineFlow(
