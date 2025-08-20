@@ -247,13 +247,16 @@ export function AppLayout() {
                 name="referenceUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-headline">Reference Style (Optional)</FormLabel>
+                    <FormLabel className="font-headline">Reference Video</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., 'youtube.com/watch?v=...'"
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Provide a link to a video whose style you'd like to match.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
