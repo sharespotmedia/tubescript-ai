@@ -42,10 +42,6 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
@@ -106,38 +102,38 @@ export function AppLayout() {
   };
 
   return (
-    <div className="h-full">
+    <div className="flex h-full w-full">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex h-full w-full"
         >
-          <Sidebar className="w-[320px] bg-background border-r border-border">
+          <Sidebar className="w-[320px] bg-sidebar border-r border-sidebar-border">
             <SidebarHeader className="p-4">
               <Logo />
             </SidebarHeader>
-            <SidebarContent className="gap-4">
-              <SidebarGroup>
-                <SidebarGroupLabel className="font-semibold text-foreground/80">
+            <SidebarContent className="p-0">
+              <SidebarGroup className="py-4">
+                <SidebarGroupLabel className="px-4 font-semibold text-foreground/80">
                   Select Content Type
                 </SidebarGroupLabel>
                 <FormField
                   control={form.control}
                   name="contentType"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="px-4">
                       <FormControl>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-2 mt-2">
                           {contentTypes.map(({ id, icon: Icon }) => (
                             <Button
                               key={id}
                               variant={
-                                field.value === id ? 'secondary' : 'ghost'
+                                field.value === id ? 'default' : 'ghost'
                               }
                               onClick={() => field.onChange(id)}
                               className={
                                 field.value === id
-                                  ? 'bg-primary text-primary-foreground'
+                                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                   : 'text-foreground/80 hover:bg-accent hover:text-accent-foreground'
                               }
                             >
@@ -152,40 +148,34 @@ export function AppLayout() {
                 />
               </SidebarGroup>
 
-              <SidebarGroup>
-                <SidebarGroupLabel className="font-semibold text-foreground/80">
+              <SidebarGroup className="py-4">
+                <SidebarGroupLabel className="px-4 font-semibold text-foreground/80">
                   Why TubeScript AI?
                 </SidebarGroupLabel>
-                <SidebarMenu>
-                  <SidebarMenuItem>
+                <div className="flex flex-col gap-2 mt-2 px-4">
                     <div className="flex items-center gap-2 text-sm text-foreground/80">
                       <Video className="size-4" /> Match any creator&apos;s style
                     </div>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
                     <div className="flex items-center gap-2 text-sm text-foreground/80">
                       <Globe className="size-4" /> Support for multiple
                       platforms
                     </div>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
                     <div className="flex items-center gap-2 text-sm text-foreground/80">
                       <Info className="size-4" /> AI-powered suggestions
                     </div>
-                  </SidebarMenuItem>
-                </SidebarMenu>
+                </div>
               </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
-              <Card className="bg-muted border-border text-foreground">
+              <Card className="bg-muted border-border text-foreground/80 rounded-none border-t border-l-0 border-r-0 border-b-0">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                     <Lightbulb className="text-yellow-400" />
                     Pro Tip
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-foreground/80">
+                  <p className="text-sm">
                     Paste a YouTube URL to perfectly match your favorite
                     creator&apos;s style and tone.
                   </p>
@@ -273,19 +263,17 @@ export function AppLayout() {
 
             <div className="flex-1 flex flex-col p-8 md:p-12 pt-0">
               {isLoading && !generatedScript ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="space-y-4 text-center">
-                    <p className="text-muted-foreground">
-                      Generating your script...
-                    </p>
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
+                <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                  <p className="text-muted-foreground">
+                    Generating your script...
+                  </p>
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-12 w-full" />
                 </div>
               ) : generatedScript ? (
                 <Card className="flex-1 bg-secondary border-border">
                   <CardContent className="p-4 h-full">
-                    <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto">
+                    <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto p-4">
                       {generatedScript}
                     </pre>
                   </CardContent>
