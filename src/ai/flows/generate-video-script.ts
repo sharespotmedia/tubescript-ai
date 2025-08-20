@@ -28,21 +28,32 @@ export async function generateVideoScript(input: GenerateVideoScriptInput): Prom
   return generateVideoScriptFlow(input);
 }
 
-const generateVideoScriptPrompt = ai.definePrompt({
-  name: 'generateVideoScriptPrompt',
-  input: {schema: GenerateVideoScriptInputSchema},
-  output: {schema: GenerateVideoScriptOutputSchema},
-  prompt: `You are an expert video script writer, known for creating scripts that are natural, engaging, and sound like a real person talking to their audience. Your scripts are ready to be used for recording immediately.
+const generateVideoScriptFlow = ai.defineFlow(
+  {
+    name: 'generateVideoScriptFlow',
+    inputSchema: GenerateVideoScriptInputSchema,
+    outputSchema: GenerateVideoScriptOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      model: gemini15Pro,
+      output: {
+        schema: GenerateVideoScriptOutputSchema,
+      },
+      prompt: `You are an expert video script writer, known for creating scripts that are natural, engaging, and sound like a real person talking to their audience. Your scripts are ready to be used for recording immediately.
 
 Generate a complete video script based on the following information:
 
-Topic: {{{topic}}}
-Content Type: {{{contentType}}}
-
-{{#if referenceUrl}}
+Topic: ${input.topic}
+Content Type: ${input.contentType}
+${
+  input.referenceUrl
+    ? `
 Analyze the style of the following reference URL and apply it to the generated script. Pay close attention to the creator's tone, pacing, vocabulary, and common phrases:
-Reference URL: {{{referenceUrl}}}
-{{/if}}
+Reference URL: ${input.referenceUrl}
+`
+    : ''
+}
 
 Your script should have a clear structure:
 1.  **Introduction (Hook)**: Grab the viewer's attention in the first 10-15 seconds. State what the video is about and why they should watch.
@@ -58,19 +69,7 @@ Writing Style Guidelines:
 
 The output should be the script itself, formatted and ready for a creator to read.
 `,
-  config: {
-    model: gemini15Pro,
-  },
-});
-
-const generateVideoScriptFlow = ai.defineFlow(
-  {
-    name: 'generateVideoScriptFlow',
-    inputSchema: GenerateVideoScriptInputSchema,
-    outputSchema: GenerateVideoScriptOutputSchema,
-  },
-  async input => {
-    const {output} = await generateVideoScriptPrompt(input);
+    });
     return output!;
   }
 );

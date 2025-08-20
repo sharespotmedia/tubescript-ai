@@ -39,20 +39,6 @@ export async function analyzeContentCreatorStyle(
   return analyzeContentCreatorStyleFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'analyzeContentCreatorStylePrompt',
-  input: {schema: AnalyzeContentCreatorStyleInputSchema},
-  output: {schema: AnalyzeContentCreatorStyleOutputSchema},
-  prompt: `You are an expert content style analyst. Analyze the content from the following URL and create a style guide that captures the content creator's unique style, including tone, vocabulary, and presentation.
-
-URL: {{{referenceUrl}}}
-
-Style Guide:`,
-  config: {
-    model: gemini15Pro,
-  },
-});
-
 const analyzeContentCreatorStyleFlow = ai.defineFlow(
   {
     name: 'analyzeContentCreatorStyleFlow',
@@ -60,7 +46,17 @@ const analyzeContentCreatorStyleFlow = ai.defineFlow(
     outputSchema: AnalyzeContentCreatorStyleOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await ai.generate({
+      prompt: `You are an expert content style analyst. Analyze the content from the following URL and create a style guide that captures the content creator's unique style, including tone, vocabulary, and presentation.
+
+URL: ${input.referenceUrl}
+
+Style Guide:`,
+      model: gemini15Pro,
+      output: {
+        schema: AnalyzeContentCreatorStyleOutputSchema,
+      },
+    });
     return output!;
   }
 );
