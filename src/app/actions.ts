@@ -4,29 +4,33 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 import { headers } from 'next/headers';
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 async function callClaudeApi(prompt: string): Promise<any> {
-    const headersList = headers();
-    const host = headersList.get('host');
-    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-    const origin = `${protocol}://${host}`;
-
-    const res = await fetch(`${origin}/api/claude`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userPrompt: prompt }),
-    });
-
-    if (!res.ok) {
-        const errorBody = await res.json();
-        throw new Error(errorBody.error || 'Failed to call Claude API');
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error(
+        'ANTHROPIC_API_KEY is not configured. Please set it in your environment variables.'
+      );
     }
-
-    const result = await res.json();
-    // The actual response from Claude is nested.
-    return result.response[0].text;
+    
+    try {
+        const msg = await anthropic.messages.create({
+            model: 'claude-3-sonnet-20240229',
+            max_tokens: 1024,
+            messages: [{role: 'user', content: prompt}],
+        });
+        return msg.content[0].text;
+    } catch (error) {
+        console.error('Error calling Anthropic API:', error);
+        if (error instanceof Anthropic.APIError) {
+          throw new Error(`Failed to call Claude AI: ${error.message}`);
+        }
+        throw new Error('An unexpected error occurred while calling Claude AI.');
+    }
 }
 
 
