@@ -4,8 +4,12 @@ import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 import { headers } from 'next/headers';
 import { generateScript } from '@/ai/flows/script-generator';
-import type { ScriptGeneratorInput } from '@/ai/schemas';
 
+interface ScriptGeneratorInput {
+  topic: string;
+  contentType: 'Vlog' | 'Tutorial' | 'Commentary' | 'Review';
+  referenceUrl?: string;
+}
 
 export async function handleGenerateScript(input: ScriptGeneratorInput) {
   try {
