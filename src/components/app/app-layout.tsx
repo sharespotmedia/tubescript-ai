@@ -110,7 +110,7 @@ export function AppLayout() {
     mode: 'onChange',
     defaultValues: {
       topic: '',
-      contentType: 'Vlog',
+      contentType: 'Commentary',
       referenceUrl: '',
     },
   });
