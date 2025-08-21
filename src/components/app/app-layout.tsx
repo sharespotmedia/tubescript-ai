@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ChevronRight,
   ClipboardList,
+  CreditCard,
   FileText,
   Globe,
   Info,
@@ -17,7 +18,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { handleGenerateScript } from '@/app/actions';
+import { handleGenerateScript, createCheckoutSession } from '@/app/actions';
 import { Logo } from '@/components/icons/logo';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,6 +62,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const formSchema = z.object({
   topic: z
@@ -89,6 +93,7 @@ export function AppLayout() {
     null
   );
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = React.useState(false);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const { toast } = useToast();
   const { user, userData, signOut } = useAuth();
@@ -141,6 +146,35 @@ export function AppLayout() {
       });
     }
     setIsLoading(false);
+  };
+  
+  const handleManageSubscription = async () => {
+    if (!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID) {
+      console.error('Stripe Price ID is not set in environment variables.');
+      toast({
+        variant: 'destructive',
+        title: 'Configuration Error',
+        description: 'The application is not configured for payments.',
+      });
+      return;
+    }
+
+    setIsManagingSubscription(true);
+    const result = await createCheckoutSession(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID);
+
+    if (result.success && result.data?.sessionId) {
+      const stripe = await stripePromise;
+      if (stripe) {
+        await stripe.redirectToCheckout({ sessionId: result.data.sessionId });
+      }
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: result.error || 'Could not initiate subscription process.',
+      });
+    }
+    setIsManagingSubscription(false);
   };
 
   const getInitials = (email?: string | null) => {
@@ -266,6 +300,15 @@ export function AppLayout() {
                               </p>
                             </div>
                           </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleManageSubscription} disabled={isManagingSubscription}>
+                            {isManagingSubscription ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <CreditCard className="mr-2 h-4 w-4" />
+                            )}
+                            <span>Manage Subscription</span>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={signOut}>
                             <LogOut className="mr-2 h-4 w-4" />
