@@ -12,7 +12,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { gemini15Pro } from '@genkit-ai/googleai';
 
 const AnalyzeContentCreatorStyleInputSchema = z.object({
   referenceUrl: z
@@ -52,7 +51,7 @@ const analyzeContentCreatorStyleFlow = ai.defineFlow(
 URL: ${input.referenceUrl}
 
 Style Guide:`,
-      model: gemini15Pro,
+      model: 'googleai/gemini-pro',
       output: {
         schema: AnalyzeContentCreatorStyleOutputSchema,
       },

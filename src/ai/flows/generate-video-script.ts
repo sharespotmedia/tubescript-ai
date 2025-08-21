@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { gemini15Pro } from '@genkit-ai/googleai';
 
 const GenerateVideoScriptInputSchema = z.object({
   topic: z.string().describe('The topic of the video script.'),
@@ -36,7 +35,7 @@ const generateVideoScriptFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await ai.generate({
-      model: gemini15Pro,
+      model: 'googleai/gemini-pro',
       output: {
         schema: GenerateVideoScriptOutputSchema,
       },
