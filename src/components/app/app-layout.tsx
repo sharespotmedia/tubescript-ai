@@ -229,6 +229,10 @@ export function AppLayout() {
             <Sidebar className="w-[320px] border-r border-sidebar-border">
               <SidebarHeader className="p-4">
                 <Logo />
+                <p className="text-sm text-sidebar-foreground/80 mt-2">
+                  Transform any idea into a professional script, matching the
+                  style of your favorite content creators.
+                </p>
               </SidebarHeader>
               <SidebarContent className="p-0">
                 <SidebarGroup className="py-4">
