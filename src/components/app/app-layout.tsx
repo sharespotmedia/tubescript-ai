@@ -234,7 +234,7 @@ export function AppLayout() {
                   style of your favorite content creators.
                 </p>
               </SidebarHeader>
-              <SidebarContent className="p-0 flex flex-col justify-between">
+              <SidebarContent className="p-0">
                 <SidebarGroup className="py-6">
                   <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
                     Select Content Type
@@ -271,25 +271,24 @@ export function AppLayout() {
                   />
                 </SidebarGroup>
 
-                <div className="mt-auto">
-                    <SidebarGroup className="py-6">
-                      <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
-                        Why TubeScript AI?
-                      </SidebarGroupLabel>
-                      <div className="flex flex-col gap-4 mt-4 px-4">
-                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
-                            <Video className="size-4 mt-0.5" /> Match any creator&apos;s style
-                          </div>
-                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
-                            <Globe className="size-4 mt-0.5" /> Support for multiple
-                            platforms
-                          </div>
-                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
-                            <Info className="size-4 mt-0.5" /> AI-powered suggestions
-                          </div>
+                <SidebarGroup className="py-6">
+                  <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
+                    Why TubeScript AI?
+                  </SidebarGroupLabel>
+                  <div className="flex flex-col gap-4 mt-4 px-4">
+                      <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                        <Video className="size-4 mt-0.5" /> Match any creator&apos;s style
                       </div>
-                    </SidebarGroup>
-                </div>
+                      <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                        <Globe className="size-4 mt-0.5" /> Support for multiple
+                        platforms
+                      </div>
+                      <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                        <Info className="size-4 mt-0.5" /> AI-powered suggestions
+                      </div>
+                  </div>
+                </SidebarGroup>
+
               </SidebarContent>
               <SidebarFooter>
                 <Card className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground/80 rounded-none border-t border-l-0 border-r-0 border-b-0">
