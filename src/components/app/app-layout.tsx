@@ -307,159 +307,160 @@ export function AppLayout() {
               </SidebarFooter>
             </Sidebar>
 
-            <main className="flex-1 flex flex-col bg-background h-full overflow-y-auto">
-              <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
-                <header className='flex justify-between items-center'>
-                  <div>
-                    <h1 className="text-4xl font-headline font-bold">
-                      Create Your Script
-                    </h1>
-                    <p className="text-muted-foreground mt-2">
-                      Start with your idea, enhance with AI, match any style
-                    </p>
-                  </div>
-                  <div>
-                    {user ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
-                              <AvatarFallback>
-                                {getInitials(user.email)}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
-                          <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                              <p className="text-sm font-medium leading-none">
-                                {user.email}
-                              </p>
-                              <p className="text-xs leading-none text-muted-foreground">
-                                {getUsageInfo()}
-                              </p>
-                            </div>
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={handleManageSubscription} disabled={isManagingSubscription}>
-                            {isManagingSubscription ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <main className="flex-1 flex flex-col bg-background h-full overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
+                        <header className='flex justify-between items-center'>
+                        <div>
+                            <h1 className="text-4xl font-headline font-bold">
+                            Create Your Script
+                            </h1>
+                            <p className="text-muted-foreground mt-2">
+                            Start with your idea, enhance with AI, match any style
+                            </p>
+                        </div>
+                        <div>
+                            {user ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                                    <Avatar className="h-10 w-10">
+                                    <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
+                                    <AvatarFallback>
+                                        {getInitials(user.email)}
+                                    </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">
+                                        {user.email}
+                                    </p>
+                                    <p className="text-xs leading-none text-muted-foreground">
+                                        {getUsageInfo()}
+                                    </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={handleManageSubscription} disabled={isManagingSubscription}>
+                                    {isManagingSubscription ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                    <CreditCard className="mr-2 h-4 w-4" />
+                                    )}
+                                    <span>Manage Subscription</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={signOut}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Log out</span>
+                                </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                             ) : (
-                              <CreditCard className="mr-2 h-4 w-4" />
+                            <Button onClick={() => setAuthDialogOpen(true)}>
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                Login
+                            </Button>
                             )}
-                            <span>Manage Subscription</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={signOut}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      <Button onClick={() => setAuthDialogOpen(true)}>
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Login
-                      </Button>
-                    )}
-                  </div>
-                </header>
+                        </div>
+                        </header>
 
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="topic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-semibold flex items-center gap-2">
-                          Video Idea
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="What's your video about? (e.g., 'Tech review of the latest...')"
-                            {...field}
-                            className="bg-secondary border-border min-h-[120px]"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Explain not only the main topic but also key ideas to be
-                          included within the script.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="referenceUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-semibold flex items-center gap-2">
-                          Reference Video (Optional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Paste a YouTube URL to match their style"
-                            {...field}
-                            className="bg-secondary border-border"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Provide a link to a video that has the style you want to
-                          emulate.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <div className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="topic"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="font-semibold flex items-center gap-2">
+                                Video Idea
+                                </FormLabel>
+                                <FormControl>
+                                <Textarea
+                                    placeholder="What's your video about? (e.g., 'Tech review of the latest...')"
+                                    {...field}
+                                    className="bg-secondary border-border min-h-[120px]"
+                                />
+                                </FormControl>
+                                <FormDescription>
+                                Explain not only the main topic but also key ideas to be
+                                included within the script.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="referenceUrl"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="font-semibold flex items-center gap-2">
+                                Reference Video (Optional)
+                                </FormLabel>
+                                <FormControl>
+                                <Input
+                                    placeholder="Paste a YouTube URL to match their style"
+                                    {...field}
+                                    className="bg-secondary border-border"
+                                />
+                                </FormControl>
+                                <FormDescription>
+                                Provide a link to a video that has the style you want to
+                                emulate.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        </div>
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={isLoading}
-                  className="self-stretch bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      Generate Script
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              <div className="flex-1 flex flex-col p-8 md:p-12 pt-0">
-                {isLoading && !generatedScript ? (
-                  <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                    <p className="text-muted-foreground">
-                      Generating your script...
-                    </p>
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
-                ) : generatedScript ? (
-                  <Card className="flex-1 bg-secondary border-border">
-                    <CardContent className="p-4 h-full">
-                      <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto p-4">
-                        {generatedScript}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-background min-h-[200px]">
-                    <div className="text-center text-muted-foreground">
-                      <FileText className="mx-auto h-12 w-12" />
-                      <p className="mt-4">
-                        Your generated script will appear here
-                      </p>
+                        <Button
+                        type="submit"
+                        size="lg"
+                        disabled={isLoading}
+                        className="self-stretch bg-primary text-primary-foreground hover:bg-primary/90 mt-4"
+                        >
+                        {isLoading ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                            <>
+                            Generate Script
+                            <ChevronRight className="ml-2 h-4 w-4" />
+                            </>
+                        )}
+                        </Button>
+                        <div className="flex-1 flex flex-col pb-8">
+                            {isLoading && !generatedScript ? (
+                            <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                                <p className="text-muted-foreground">
+                                Generating your script...
+                                </p>
+                                <Skeleton className="h-24 w-full" />
+                                <Skeleton className="h-12 w-full" />
+                            </div>
+                            ) : generatedScript ? (
+                            <Card className="flex-1 bg-secondary border-border">
+                                <CardContent className="p-4 h-full">
+                                <pre className="text-sm whitespace-pre-wrap font-sans h-full overflow-auto p-4">
+                                    {generatedScript}
+                                </pre>
+                                </CardContent>
+                            </Card>
+                            ) : (
+                            <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-border bg-background min-h-[200px]">
+                                <div className="text-center text-muted-foreground">
+                                <FileText className="mx-auto h-12 w-12" />
+                                <p className="mt-4">
+                                    Your generated script will appear here
+                                </p>
+                                </div>
+                            </div>
+                            )}
+                        </div>
                     </div>
-                  </div>
-                )}
               </div>
             </main>
           </form>
