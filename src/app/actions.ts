@@ -4,21 +4,28 @@ import {
   generateVideoScript,
   type GenerateVideoScriptInput,
 } from '@/ai/flows/generate-video-script';
+import { analyzeContentCreatorStyle } from '@/ai/flows/analyze-content-creator-style';
 import { doc, getDoc, setDoc, increment, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 
-
-export async function handleGenerateScript(input: GenerateVideoScriptInput) {
+export async function handleGenerateScript(input: {
+  topic: string;
+  contentType: 'Vlog' | 'Tutorial' | 'Commentary' | 'Review';
+  referenceUrl?: string;
+}) {
   try {
+    let styleGuide: string | undefined = undefined;
+    if (input.referenceUrl) {
+      const styleAnalysis = await analyzeContentCreatorStyle({ referenceUrl: input.referenceUrl });
+      styleGuide = styleAnalysis.styleGuide;
+    }
+    
     const payload: GenerateVideoScriptInput = {
       topic: input.topic,
       contentType: input.contentType,
+      styleGuide: styleGuide,
     };
-
-    if (input.referenceUrl) {
-      payload.referenceUrl = input.referenceUrl;
-    }
 
     const result = await generateVideoScript(payload);
     return { success: true, data: result };

@@ -15,7 +15,7 @@ import { gemini15Pro } from '@genkit-ai/googleai';
 const GenerateVideoScriptInputSchema = z.object({
   topic: z.string().describe('The topic of the video script.'),
   contentType: z.enum(['Vlog', 'Tutorial', 'Commentary', 'Review']).describe('The type of content for the video script.'),
-  referenceUrl: z.string().url().optional().describe('An optional reference URL to analyze for style.'),
+  styleGuide: z.string().optional().describe('An optional style guide to apply to the generated script.'),
 });
 export type GenerateVideoScriptInput = z.infer<typeof GenerateVideoScriptInputSchema>;
 
@@ -47,10 +47,10 @@ Generate a complete video script based on the following information:
 Topic: ${input.topic}
 Content Type: ${input.contentType}
 ${
-  input.referenceUrl
+  input.styleGuide
     ? `
-Analyze the style of the following reference URL and apply it to the generated script. Pay close attention to the creator's tone, pacing, vocabulary, and common phrases:
-Reference URL: ${input.referenceUrl}
+Apply the following style guide to the generated script. Pay close attention to the creator's tone, pacing, vocabulary, and common phrases:
+Style Guide: ${input.styleGuide}
 `
     : ''
 }
