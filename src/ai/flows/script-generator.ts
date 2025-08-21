@@ -23,6 +23,9 @@ const styleAnalysisPrompt = ai.definePrompt({
 URL: {{{referenceUrl}}}
 
 Respond with only the style guide.`,
+  config: {
+    model: 'gemini-pro',
+  },
 });
 
 const scriptGenerationPrompt = ai.definePrompt({
