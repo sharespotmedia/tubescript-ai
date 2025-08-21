@@ -227,15 +227,15 @@ export function AppLayout() {
             className="flex h-full w-full"
           >
             <Sidebar className="w-[320px] border-r border-sidebar-border">
-              <SidebarHeader className="p-4">
+              <SidebarHeader className="p-4 border-b border-sidebar-border">
                 <Logo />
                 <p className="text-sm text-sidebar-foreground/80 mt-2">
                   Transform any idea into a professional script, matching the
                   style of your favorite content creators.
                 </p>
               </SidebarHeader>
-              <SidebarContent className="p-0">
-                <SidebarGroup className="py-4 pt-8">
+              <SidebarContent className="p-0 flex flex-col justify-between">
+                <SidebarGroup className="py-6">
                   <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
                     Select Content Type
                   </SidebarGroupLabel>
@@ -271,23 +271,25 @@ export function AppLayout() {
                   />
                 </SidebarGroup>
 
-                <SidebarGroup className="py-4 pt-8">
-                  <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
-                    Why TubeScript AI?
-                  </SidebarGroupLabel>
-                  <div className="flex flex-col gap-2 mt-2 px-4">
-                      <div className="flex items-center gap-2 text-sm text-sidebar-foreground/80">
-                        <Video className="size-4" /> Match any creator&apos;s style
+                <div className="mt-auto">
+                    <SidebarGroup className="py-6">
+                      <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
+                        Why TubeScript AI?
+                      </SidebarGroupLabel>
+                      <div className="flex flex-col gap-4 mt-4 px-4">
+                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                            <Video className="size-4 mt-0.5" /> Match any creator&apos;s style
+                          </div>
+                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                            <Globe className="size-4 mt-0.5" /> Support for multiple
+                            platforms
+                          </div>
+                          <div className="flex items-start gap-3 text-sm text-sidebar-foreground/80">
+                            <Info className="size-4 mt-0.5" /> AI-powered suggestions
+                          </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-sidebar-foreground/80">
-                        <Globe className="size-4" /> Support for multiple
-                        platforms
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-sidebar-foreground/80">
-                        <Info className="size-4" /> AI-powered suggestions
-                      </div>
-                  </div>
-                </SidebarGroup>
+                    </SidebarGroup>
+                </div>
               </SidebarContent>
               <SidebarFooter>
                 <Card className="bg-sidebar-accent border-sidebar-border text-sidebar-foreground/80 rounded-none border-t border-l-0 border-r-0 border-b-0">
@@ -309,7 +311,7 @@ export function AppLayout() {
 
             <main className="flex-1 flex flex-col bg-background h-full overflow-hidden">
                 <div className="flex-1 overflow-y-auto">
-                    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
+                    <div className="flex flex-col gap-8 max-w-2xl mx-auto p-8 md:p-12">
                         <header className='flex justify-between items-center'>
                         <div>
                             <h1 className="text-4xl font-headline font-bold">
@@ -438,8 +440,14 @@ export function AppLayout() {
                                 <p className="text-muted-foreground">
                                 Generating your script...
                                 </p>
-                                <Skeleton className="h-24 w-full" />
-                                <Skeleton className="h-12 w-full" />
+
+                                <div className="space-y-2 w-full">
+                                    <Skeleton className="h-4 w-3/4" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-2/3" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                </div>
                             </div>
                             ) : generatedScript ? (
                             <Card className="flex-1 bg-secondary border-border">
