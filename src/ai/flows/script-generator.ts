@@ -55,21 +55,9 @@ async function generateScriptFromStyle(
   contentType: string,
   styleGuide?: string
 ): Promise<string> {
-  const system = `You are an expert video script writer, known for creating scripts that are natural, engaging, and sound like a real person talking to their audience. Your scripts are ready to be used for recording immediately.
+  const system = `You are an expert video script writer. Your task is to create a script that is ready for voiceover. The script should be natural, engaging, and sound like a real person talking to their audience.
 
-Your script should have a clear structure:
-1.  **Introduction (Hook)**: Grab the viewer's attention in the first 10-15 seconds. State what the video is about and why they should watch.
-2.  **Main Content**: Deliver the core message. Break it down into clear, easy-to-follow points.
-3.  **Conclusion (Outro)**: Summarize the key takeaways and include a clear call to action (e.g., "like and subscribe," "check out this other video," "leave a comment below").
-
-Writing Style Guidelines:
--   **Be Conversational**: Write as if you're talking to a friend. Use contractions (e.g., "it's," "you're").
--   **Add Pauses**: Indicate where the speaker should pause for effect, using "(pause)" or "...".
--   **Emphasize Words**: Suggest which words or phrases should be emphasized to add personality.
--   **Include Action/Visual Cues**: Add notes in brackets like "[Show B-roll of...]" or "[Text on screen: ...]" to suggest visuals. This makes the script ready for editing.
--   **Clarity is Key**: Make sure the script is easy to read and understand.
-
-The output should be the script itself, formatted and ready for a creator to read. Do not include any introductory text like "Here is the script".`;
+Do not include any visual cues, scene directions, or notes like "[B-roll of...]" or "(pause)". The output should only contain the spoken words of the script.`;
 
   let userContent = `Generate a complete video script based on the following information:\n\nTopic: ${topic}\nContent Type: ${contentType}`;
 
@@ -87,9 +75,9 @@ export async function generateScript(
 
   if (input.referenceUrl) {
     try {
-      const response = await fetch(input.referenceUrl);
-      const text = await response.text();
-      // This is a simplified analysis. A real implementation might extract more structured data.
+      // We don't need to actually fetch the URL content here,
+      // as the style analysis API will do that. This is just a placeholder
+      // to check if the URL is provided.
       styleGuide = await getStyleGuide(input.referenceUrl);
     } catch (error) {
       console.warn('Could not fetch or analyze reference URL:', error);
