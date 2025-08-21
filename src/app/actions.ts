@@ -1,18 +1,17 @@
 'use server';
 
-import {
-  type GenerateVideoScriptInput,
-} from '@/ai/flows/generate-video-script';
-import { doc, getDoc, setDoc, increment, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 import { headers } from 'next/headers';
 
 async function callClaudeApi(prompt: string): Promise<any> {
-    const host = headers().get('host');
+    const headersList = headers();
+    const host = headersList.get('host');
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+    const origin = `${protocol}://${host}`;
 
-    const res = await fetch(`${protocol}://${host}/api/claude`, {
+    const res = await fetch(`${origin}/api/claude`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
