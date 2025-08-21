@@ -27,7 +27,7 @@ async function callClaudeApi(prompt: string): Promise<any> {
     } catch (error) {
         console.error('Error calling Anthropic API:', error);
         if (error instanceof Anthropic.APIError) {
-          throw new Error(`Failed to call Claude AI: ${error.message}`);
+          throw new Error(`Failed to call Claude AI: ${error.status} ${error.message}`);
         }
         throw new Error('An unexpected error occurred while calling Claude AI.');
     }
