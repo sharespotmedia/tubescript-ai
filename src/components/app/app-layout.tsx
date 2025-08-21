@@ -10,6 +10,8 @@ import {
   Info,
   Lightbulb,
   Loader2,
+  LogOut,
+  User as UserIcon,
   Video,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -46,6 +48,19 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { Textarea } from '../ui/textarea';
+import { useAuth } from '@/hooks/use-auth';
+import { AuthDialog } from './auth-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const formSchema = z.object({
   topic: z
@@ -67,12 +82,16 @@ const contentTypes = [
   { id: 'Review', icon: ClipboardList },
 ];
 
+const FREE_TIER_LIMIT = 3;
+
 export function AppLayout() {
   const [generatedScript, setGeneratedScript] = React.useState<string | null>(
     null
   );
   const [isLoading, setIsLoading] = React.useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
   const { toast } = useToast();
+  const { user, userData, signOut } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,11 +104,34 @@ export function AppLayout() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user || !userData) {
+      setAuthDialogOpen(true);
+      return;
+    }
+    
+    if (
+      userData.subscriptionTier === 'free' &&
+      userData.scriptsGenerated >= FREE_TIER_LIMIT
+    ) {
+      toast({
+        variant: 'destructive',
+        title: 'Free Limit Reached',
+        description: 'Please upgrade to a paid plan for unlimited script generations.',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setGeneratedScript(null);
     const result = await handleGenerateScript(values);
     if (result.success && result.data) {
       setGeneratedScript(result.data.script);
+      if (user) {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          scriptsGenerated: increment(1),
+        });
+      }
     } else {
       toast({
         variant: 'destructive',
@@ -99,6 +141,10 @@ export function AppLayout() {
       });
     }
     setIsLoading(false);
+  };
+
+  const getInitials = (email?: string | null) => {
+    return email ? email.charAt(0).toUpperCase() : '?';
   };
 
   return (
@@ -187,13 +233,53 @@ export function AppLayout() {
 
             <main className="flex-1 flex flex-col bg-background h-full overflow-y-auto">
               <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 md:p-12">
-                <header>
-                  <h1 className="text-4xl font-headline font-bold">
-                    Create Your Script
-                  </h1>
-                  <p className="text-muted-foreground mt-2">
-                    Start with your idea, enhance with AI, match any style
-                  </p>
+                <header className='flex justify-between items-center'>
+                  <div>
+                    <h1 className="text-4xl font-headline font-bold">
+                      Create Your Script
+                    </h1>
+                    <p className="text-muted-foreground mt-2">
+                      Start with your idea, enhance with AI, match any style
+                    </p>
+                  </div>
+                  <div>
+                    {user ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
+                              <AvatarFallback>
+                                {getInitials(user.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                          <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                              <p className="text-sm font-medium leading-none">
+                                {user.email}
+                              </p>
+                              <p className="text-xs leading-none text-muted-foreground">
+                                {userData?.subscriptionTier === 'free' ? `Free Tier (${userData.scriptsGenerated}/${FREE_TIER_LIMIT})` : 'Paid Tier'}
+                              </p>
+                            </div>
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={signOut}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button onClick={() => setAuthDialogOpen(true)}>
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Login
+                      </Button>
+                    )}
+                  </div>
                 </header>
 
                 <div className="space-y-6">
@@ -294,6 +380,7 @@ export function AppLayout() {
           </form>
         </Form>
       </div>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
     </div>
   );
 }

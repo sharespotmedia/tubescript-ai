@@ -1,6 +1,13 @@
 'use server';
 
-import { generateVideoScript, type GenerateVideoScriptInput } from '@/ai/flows/generate-video-script';
+import {
+  generateVideoScript,
+  type GenerateVideoScriptInput,
+} from '@/ai/flows/generate-video-script';
+import { doc, getDoc, setDoc, increment, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
+
 
 export async function handleGenerateScript(input: GenerateVideoScriptInput) {
   try {
@@ -12,12 +19,13 @@ export async function handleGenerateScript(input: GenerateVideoScriptInput) {
     if (input.referenceUrl) {
       payload.referenceUrl = input.referenceUrl;
     }
-    
+
     const result = await generateVideoScript(payload);
     return { success: true, data: result };
   } catch (error) {
     console.error('Error generating script:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    const errorMessage =
+      error instanceof Error ? error.message : 'An unknown error occurred.';
     return { success: false, error: errorMessage };
   }
 }
