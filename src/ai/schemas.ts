@@ -1,4 +1,4 @@
-import {z} from 'genkit';
+import {z} from 'zod';
 
 export const ScriptGeneratorInputSchema = z.object({
   topic: z.string().describe('The main topic of the video.'),
