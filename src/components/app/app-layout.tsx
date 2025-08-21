@@ -235,7 +235,7 @@ export function AppLayout() {
                 </p>
               </SidebarHeader>
               <SidebarContent className="p-0">
-                <SidebarGroup className="py-4">
+                <SidebarGroup className="py-4 pt-8">
                   <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
                     Select Content Type
                   </SidebarGroupLabel>
@@ -271,7 +271,7 @@ export function AppLayout() {
                   />
                 </SidebarGroup>
 
-                <SidebarGroup className="py-4">
+                <SidebarGroup className="py-4 pt-8">
                   <SidebarGroupLabel className="px-4 font-semibold text-sidebar-foreground/80">
                     Why TubeScript AI?
                   </SidebarGroupLabel>
