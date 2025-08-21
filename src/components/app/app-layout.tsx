@@ -87,6 +87,7 @@ const contentTypes = [
 ];
 
 const FREE_TIER_LIMIT = 3;
+const ANONYMOUS_USAGE_KEY = 'anonymousScriptCount';
 
 export function AppLayout() {
   const [generatedScript, setGeneratedScript] = React.useState<string | null>(
@@ -95,8 +96,14 @@ export function AppLayout() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = React.useState(false);
   const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [anonymousUsage, setAnonymousUsage] = React.useState(0);
   const { toast } = useToast();
   const { user, userData, signOut } = useAuth();
+
+  React.useEffect(() => {
+    const storedUsage = localStorage.getItem(ANONYMOUS_USAGE_KEY);
+    setAnonymousUsage(storedUsage ? parseInt(storedUsage, 10) : 0);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -109,26 +116,37 @@ export function AppLayout() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user || !userData) {
-      setAuthDialogOpen(true);
-      return;
-    }
-    
-    if (
-      userData.subscriptionTier === 'free' &&
-      userData.scriptsGenerated >= FREE_TIER_LIMIT
-    ) {
-      toast({
-        variant: 'destructive',
-        title: 'Free Limit Reached',
-        description: 'Please upgrade to a paid plan for unlimited script generations.',
-      });
-      return;
-    }
-
     setIsLoading(true);
     setGeneratedScript(null);
+
+    if (user && userData) {
+      if (
+        userData.subscriptionTier === 'free' &&
+        userData.scriptsGenerated >= FREE_TIER_LIMIT
+      ) {
+        toast({
+          variant: 'destructive',
+          title: 'Free Limit Reached',
+          description: 'Please upgrade to a paid plan for unlimited script generations.',
+        });
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      if (anonymousUsage >= FREE_TIER_LIMIT) {
+        toast({
+          variant: 'destructive',
+          title: 'Free Limit Reached',
+          description: 'Please create an account or log in to continue.',
+        });
+        setAuthDialogOpen(true);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
     const result = await handleGenerateScript(values);
+
     if (result.success && result.data) {
       setGeneratedScript(result.data.script);
       if (user) {
@@ -136,6 +154,10 @@ export function AppLayout() {
         await updateDoc(userRef, {
           scriptsGenerated: increment(1),
         });
+      } else {
+        const newUsage = anonymousUsage + 1;
+        setAnonymousUsage(newUsage);
+        localStorage.setItem(ANONYMOUS_USAGE_KEY, newUsage.toString());
       }
     } else {
       toast({
@@ -149,6 +171,11 @@ export function AppLayout() {
   };
   
   const handleManageSubscription = async () => {
+    if (!user) {
+      setAuthDialogOpen(true);
+      return;
+    }
+
     if (!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID) {
       console.error('Stripe Price ID is not set in environment variables.');
       toast({
@@ -180,6 +207,16 @@ export function AppLayout() {
   const getInitials = (email?: string | null) => {
     return email ? email.charAt(0).toUpperCase() : '?';
   };
+  
+  const getUsageInfo = () => {
+    if (user && userData) {
+      if (userData.subscriptionTier === 'paid') {
+        return 'Paid Tier';
+      }
+      return `Free Tier (${userData.scriptsGenerated}/${FREE_TIER_LIMIT})`;
+    }
+    return `Free Tier (${anonymousUsage}/${FREE_TIER_LIMIT})`;
+  };
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -208,6 +245,7 @@ export function AppLayout() {
                             {contentTypes.map(({ id, icon: Icon }) => (
                               <Button
                                 key={id}
+                                type="button"
                                 variant={
                                   field.value === id ? 'default' : 'ghost'
                                 }
@@ -296,7 +334,7 @@ export function AppLayout() {
                                 {user.email}
                               </p>
                               <p className="text-xs leading-none text-muted-foreground">
-                                {userData?.subscriptionTier === 'free' ? `Free Tier (${userData.scriptsGenerated}/${FREE_TIER_LIMIT})` : 'Paid Tier'}
+                                {getUsageInfo()}
                               </p>
                             </div>
                           </DropdownMenuLabel>
