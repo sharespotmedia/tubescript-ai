@@ -1,53 +1,66 @@
 'use server';
 /**
- * @fileoverview A flow that generates a video script.
+ * @fileoverview Flow to generate a video script using the Anthropic API.
  */
+import type {ScriptGeneratorInput} from '@/ai/schemas';
 
-import {ai} from '@/ai/genkit';
-import {
-  ScriptGeneratorInputSchema,
-  ScriptGeneratorOutputSchema,
-  type ScriptGeneratorInput,
-} from '@/ai/schemas';
+const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_MODEL = 'claude-3-sonnet-20240229';
 
-const styleAnalysisPrompt = ai.definePrompt({
-  name: 'styleAnalysisPrompt',
-  input: {
-    schema: ScriptGeneratorInputSchema.pick({referenceUrl: true}).required(),
-  },
-  output: {
-    schema: ScriptGeneratorOutputSchema,
-  },
-  prompt: `You are an expert content style analyst. Analyze the content from the following URL and create a style guide that captures the content creator's unique style, including tone, vocabulary, and presentation.
+async function callAnthropicAPI(system: string, user_prompt: string) {
+  if (!ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not set in environment variables.');
+  }
 
-URL: {{{referenceUrl}}}
+  try {
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 4096,
+        system: system,
+        messages: [{role: 'user', content: user_prompt}],
+      }),
+    });
 
-Respond with only the style guide.`,
-  config: {
-    model: 'gemini-pro',
-  },
-});
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error('Anthropic API Error:', errorBody);
+      throw new Error(
+        `Anthropic API request failed with status ${response.status}: ${errorBody}`
+      );
+    }
 
-const scriptGenerationPrompt = ai.definePrompt({
-  name: 'scriptGenerationPrompt',
-  input: {
-    schema: ScriptGeneratorInputSchema.extend({
-      styleGuide: ScriptGeneratorOutputSchema.optional(),
-    }),
-  },
-  output: {
-    schema: ScriptGeneratorOutputSchema,
-  },
-  prompt: `You are an expert video script writer, known for creating scripts that are natural, engaging, and sound like a real person talking to their audience. Your scripts are ready to be used for recording immediately.
+    const result = await response.json();
+    return result.content[0].text;
+  } catch (error) {
+    console.error('Error calling Anthropic API:', error);
+    throw error;
+  }
+}
 
-Generate a complete video script based on the following information:
+export async function generateScript(
+  input: ScriptGeneratorInput
+): Promise<string> {
+  let styleGuide: string | undefined = undefined;
+  if (input.referenceUrl) {
+    const styleAnalysisSystemPrompt = `You are an expert content style analyst. Analyze the content from the following URL and create a style guide that captures the content creator\'s unique style, including tone, vocabulary, and presentation.
 
-Topic: {{{topic}}}
-Content Type: {{{contentType}}}
-{{#if styleGuide}}
-Apply the following style guide to the generated script. Pay close attention to the creator's tone, pacing, vocabulary, and common phrases:
-Style Guide: {{{styleGuide}}}
-{{/if}}
+Respond with only the style guide.`;
+    const styleAnalysisUserPrompt = `URL: ${input.referenceUrl}`;
+    styleGuide = await callAnthropicAPI(
+      styleAnalysisSystemPrompt,
+      styleAnalysisUserPrompt
+    );
+  }
+
+  const scriptGenerationSystemPrompt = `You are an expert video script writer, known for creating scripts that are natural, engaging, and sound like a real person talking to their audience. Your scripts are ready to be used for recording immediately.
 
 Your script should have a clear structure:
 1.  **Introduction (Hook)**: Grab the viewer's attention in the first 10-15 seconds. State what the video is about and why they should watch.
@@ -61,38 +74,23 @@ Writing Style Guidelines:
 -   **Include Action/Visual Cues**: Add notes in brackets like "[Show B-roll of...]" or "[Text on screen: ...]" to suggest visuals. This makes the script ready for editing.
 -   **Clarity is Key**: Make sure the script is easy to read and understand.
 
-The output should be the script itself, formatted and ready for a creator to read. Do not include any introductory text like "Here is the script".`,
-  config: {
-    model: 'gemini-pro',
-  },
-});
+The output should be the script itself, formatted and ready for a creator to read. Do not include any introductory text like "Here is the script".`;
 
-const generateScriptFlow = ai.defineFlow(
-  {
-    name: 'generateScriptFlow',
-    inputSchema: ScriptGeneratorInputSchema,
-    outputSchema: ScriptGeneratorOutputSchema,
-  },
-  async (input) => {
-    let styleGuide: string | undefined = undefined;
-    if (input.referenceUrl) {
-      const styleAnalysisResponse = await styleAnalysisPrompt({
-        referenceUrl: input.referenceUrl,
-      });
-      styleGuide = styleAnalysisResponse.output;
-    }
+  const scriptGenerationUserPrompt = `Generate a complete video script based on the following information:
 
-    const scriptResponse = await scriptGenerationPrompt({
-      ...input,
-      styleGuide,
-    });
+Topic: ${input.topic}
+Content Type: ${input.contentType}
+${
+  styleGuide
+    ? `
+Apply the following style guide to the generated script. Pay close attention to the creator's tone, pacing, vocabulary, and common phrases:
+Style Guide: ${styleGuide}`
+    : ''
+}
+`;
 
-    return scriptResponse.output!;
-  }
-);
-
-export async function generateScript(
-  input: ScriptGeneratorInput
-): Promise<string> {
-  return generateScriptFlow(input);
+  return callAnthropicAPI(
+    scriptGenerationSystemPrompt,
+    scriptGenerationUserPrompt
+  );
 }
