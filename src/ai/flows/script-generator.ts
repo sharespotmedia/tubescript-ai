@@ -4,34 +4,19 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-export const ScriptGeneratorInputSchema = z.object({
-  topic: z.string().describe('The main topic of the video.'),
-  contentType: z
-    .enum(['Vlog', 'Tutorial', 'Commentary', 'Review'])
-    .describe('The type of content to be generated.'),
-  referenceUrl: z
-    .string()
-    .optional()
-    .describe(
-      'An optional URL to a reference video to match its style and tone.'
-    ),
-});
-
-export const ScriptGeneratorOutputSchema = z
-  .string()
-  .describe('The fully generated video script.');
+import {
+  ScriptGeneratorInputSchema,
+  ScriptGeneratorOutputSchema,
+  type ScriptGeneratorInput,
+} from '@/ai/schemas';
 
 const styleAnalysisPrompt = ai.definePrompt({
   name: 'styleAnalysisPrompt',
   input: {
-    schema: z.object({
-      referenceUrl: z.string(),
-    }),
+    schema: ScriptGeneratorInputSchema.pick({referenceUrl: true}).required(),
   },
   output: {
-    schema: z.string(),
+    schema: ScriptGeneratorOutputSchema,
   },
   prompt: `You are an expert content style analyst. Analyze the content from the following URL and create a style guide that captures the content creator's unique style, including tone, vocabulary, and presentation.
 
@@ -44,7 +29,7 @@ const scriptGenerationPrompt = ai.definePrompt({
   name: 'scriptGenerationPrompt',
   input: {
     schema: ScriptGeneratorInputSchema.extend({
-      styleGuide: z.string().optional(),
+      styleGuide: ScriptGeneratorOutputSchema.optional(),
     }),
   },
   output: {
@@ -79,7 +64,7 @@ The output should be the script itself, formatted and ready for a creator to rea
   },
 });
 
-export const generateScriptFlow = ai.defineFlow(
+const generateScriptFlow = ai.defineFlow(
   {
     name: 'generateScriptFlow',
     inputSchema: ScriptGeneratorInputSchema,
@@ -104,7 +89,7 @@ export const generateScriptFlow = ai.defineFlow(
 );
 
 export async function generateScript(
-  input: z.infer<typeof ScriptGeneratorInputSchema>
+  input: ScriptGeneratorInput
 ): Promise<string> {
   return generateScriptFlow(input);
 }
