@@ -1,5 +1,4 @@
 'use server';
-import 'dotenv/config';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
