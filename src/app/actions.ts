@@ -4,33 +4,45 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 import { headers } from 'next/headers';
-import Anthropic from '@anthropic-ai/sdk';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 async function callClaudeApi(prompt: string): Promise<any> {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      throw new Error(
-        'ANTHROPIC_API_KEY is not configured. Please set it in your environment variables.'
-      );
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error(
+      'ANTHROPIC_API_KEY is not configured. Please set it in your environment variables.'
+    );
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-sonnet-20240229',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.json();
+        console.error('Anthropic API Error:', errorBody);
+        throw new Error(`Failed to call Claude AI: ${response.status} ${errorBody.error?.message || response.statusText}`);
     }
     
-    try {
-        const msg = await anthropic.messages.create({
-            model: 'claude-3-sonnet-20240229',
-            max_tokens: 1024,
-            messages: [{role: 'user', content: prompt}],
-        });
-        return msg.content[0].text;
-    } catch (error) {
-        console.error('Error calling Anthropic API:', error);
-        if (error instanceof Anthropic.APIError) {
-          throw new Error(`Failed to call Claude AI: ${error.status} ${error.message}`);
-        }
-        throw new Error('An unexpected error occurred while calling Claude AI.');
+    const data = await response.json();
+    return data.content[0].text;
+
+  } catch (error) {
+    console.error('Error calling Anthropic API:', error);
+    if (error instanceof Error) {
+        throw new Error(error.message);
     }
+    throw new Error('An unexpected error occurred while calling Claude AI.');
+  }
 }
 
 
