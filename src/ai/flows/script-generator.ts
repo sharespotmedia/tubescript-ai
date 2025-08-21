@@ -13,36 +13,31 @@ async function callAnthropicAPI(system: string, user_prompt: string) {
     throw new Error('ANTHROPIC_API_KEY is not set in environment variables.');
   }
 
-  try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: 4096,
-        system: system,
-        messages: [{role: 'user', content: user_prompt}],
-      }),
-    });
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: ANTHROPIC_MODEL,
+      max_tokens: 4096,
+      system: system,
+      messages: [{role: 'user', content: user_prompt}],
+    }),
+  });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('Anthropic API Error:', errorBody);
-      throw new Error(
-        `Anthropic API request failed with status ${response.status}: ${errorBody}`
-      );
-    }
-
-    const result = await response.json();
-    return result.content[0].text;
-  } catch (error) {
-    console.error('Error calling Anthropic API:', error);
-    throw error;
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error('Anthropic API Error:', errorBody);
+    throw new Error(
+      `Anthropic API request failed with status ${response.status}: ${errorBody}`
+    );
   }
+
+  const result = await response.json();
+  return result.content[0].text;
 }
 
 export async function generateScript(
